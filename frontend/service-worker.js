@@ -3,6 +3,7 @@ const FILES_TO_CACHE = [
   "/",
   "/asset-form.html",
   "/asset-table.html",
+  "/style.css",
   "/manifest.json"
 ];
 

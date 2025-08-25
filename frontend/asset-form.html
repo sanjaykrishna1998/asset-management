@@ -2,145 +2,327 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Asset</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>Asset Form (Offline)</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#007bff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Asset Manager">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
   <style>
+    :root {
+      --bg: #eef2f7;
+      --card: #ffffff;
+      --primary: #007bff;
+      --primary-600: #0056b3;
+      --text: #111827;
+      --muted: #6b7280;
+      --success: #16a34a;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 30px;
+      margin: 0;
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 80% -200px, #dbeafe 0%, #eef2f7 50%, #eef2f7 100%);
+      min-height: 100svh;
+      padding: 24px;
+      display: grid;
+      place-items: start center;
     }
-
-    .container {
-      background: white;
-      padding: 25px 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      width: 700px;
+    .wrap {
+      width: min(960px, 92vw);
+    }
+    header {
       text-align: center;
+      margin: 8px 0 20px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3.6vw, 28px);
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    p.sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
     }
 
-    h1 {
-      color: #1e88e5;
-      margin-bottom: 20px;
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(16px, 3.6vw, 22px);
+      transition: transform .2s ease, box-shadow .2s ease;
     }
 
     form {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px 16px;
+    }
+    @media (max-width: 900px) {
+      form { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px) {
+      form { grid-template-columns: 1fr; }
     }
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 5px;
-      color: #333;
+    .field { display: grid; gap: 6px; }
+    label { font-weight: 600; font-size: 14px; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    input:focus, select:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px #dbeafe;
     }
 
-    input {
-      width: 90%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 4px;
     }
-
-    button {
-      grid-column: span 3;
-      padding: 12px;
-      background: #1e88e5;
-      color: white;
-      font-size: 16px;
+    .btn {
+      appearance: none;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 15px;
       cursor: pointer;
-      margin-top: 10px;
+      transition: transform .05s ease, filter .2s ease, background .2s ease;
     }
-
-    button:hover {
-      background: #1565c0;
-    }
-
-    #message {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      display: none;
-    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.03); }
+    .btn-primary:active { background: var(--primary-600); }
 
     .success {
-      color: #2e7d32;
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #ecfdf5;
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 id="title">💾 Add Asset (Offline)</h1>
+  <div class="wrap">
+    <header id="header">
+      <h1 id="title">Add Asset (Works Offline)</h1>
+      <p class="sub">Fill the form below. It saves to your device when offline and you can sync later.</p>
+    </header>
 
-    <form id="assetForm">
-      <div><label>Asset Name</label><input type="text" id="assetName" required /></div>
-      <div><label>Asset Type</label><input type="text" id="assetType" required /></div>
-      <div><label>Purchase Date</label><input type="date" id="purchaseDate" required /></div>
-      <div><label>Warranty Expiry</label><input type="date" id="warrantyExpiry" required /></div>
-      <div><label>Asset Status</label><input type="text" id="assetStatus" required /></div>
-      <div><label>Asset Condition</label><input type="text" id="assetCondition" required /></div>
-      <button type="submit">💾 Save Offline</button>
-    </form>
+    <section class="card" id="formCard">
+      <form id="assetForm" autocomplete="off">
+        <div class="field">
+          <label for="assetName">Asset Name</label>
+          <input type="text" id="assetName" required placeholder="e.g., Laser Printer" />
+        </div>
 
-    <p id="message"></p>
+        <div class="field">
+          <label for="assetType">Asset Type</label>
+          <input type="text" id="assetType" required placeholder="e.g., Hardware" />
+        </div>
+
+        <div class="field">
+          <label for="purchaseDate">Purchase Date</label>
+          <input type="date" id="purchaseDate" required />
+        </div>
+
+        <div class="field">
+          <label for="warrantyExpiry">Warranty Expiry</label>
+          <input type="date" id="warrantyExpiry" required />
+        </div>
+
+        <div class="field">
+          <label for="assetStatus">Asset Status</label>
+          <input type="text" id="assetStatus" required placeholder="e.g., Active" />
+        </div>
+
+        <div class="field">
+          <label for="assetCondition">Asset Condition</label>
+          <input type="text" id="assetCondition" required placeholder="e.g., Good" />
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">💾 Save Offline</button>
+        </div>
+      </form>
+
+      <div class="success" id="successMsg">
+        ✅ Saved to offline storage. Please sync when you’re online. This page will refresh in 10 seconds.
+      </div>
+    </section>
+
+    <footer>
+      Tip: Install to Home Screen for the best offline experience.
+    </footer>
   </div>
 
   <script>
-    let db, useLocalStorage = false;
-    const request = indexedDB.open("AssetDB", 1);
-    request.onerror = () => { useLocalStorage = true; };
-    request.onupgradeneeded = (e) => {
-      db = e.target.result;
-      db.createObjectStore("assets", { keyPath: "id", autoIncrement: true });
-    };
-    request.onsuccess = (e) => { db = e.target.result; };
+    /***** Connectivity logs (helpful while testing) *****/
+    window.addEventListener("online",  () => console.log("📶 Online"));
+    window.addEventListener("offline", () => console.log("🚫 Offline"));
 
-    document.getElementById("assetForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+    /***** Service Worker registration with cache-busting *****/
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/service-worker.js?v=" + Date.now())
+        .then(reg => {
+          console.log("✅ Service Worker registered", reg.scope);
+          return navigator.serviceWorker.ready;
+        })
+        .then(() => console.log("✅ Service Worker ready"))
+        .catch(err => console.error("❌ SW registration failed:", err));
+    } else {
+      console.warn("Service Worker not supported in this browser");
+    }
+
+    /***** IndexedDB (with localStorage fallback) *****/
+    let db = null;
+    let useLocalStorage = false;
+
+    function openDB() {
+      return new Promise((resolve) => {
+        if (!("indexedDB" in window)) {
+          console.warn("IndexedDB not supported. Falling back to localStorage.");
+          useLocalStorage = true;
+          return resolve(null);
+        }
+        const req = indexedDB.open("AssetDB", 1);
+
+        req.onerror = (e) => {
+          console.error("❌ IndexedDB open error:", e);
+          useLocalStorage = true;
+          resolve(null);
+        };
+
+        req.onupgradeneeded = (e) => {
+          const _db = e.target.result;
+          if (!_db.objectStoreNames.contains("assets")) {
+            _db.createObjectStore("assets", { keyPath: "id", autoIncrement: true });
+          }
+        };
+
+        req.onsuccess = (e) => {
+          db = e.target.result;
+          console.log("✅ IndexedDB opened");
+          resolve(db);
+        };
+      });
+    }
+
+    function saveToIndexedDB(asset) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("assets", "readwrite");
+        const store = tx.objectStore("assets");
+        const addReq = store.add(asset);
+
+        addReq.onsuccess = () => {
+          console.log("💾 Added to IndexedDB:", asset);
+        };
+        addReq.onerror = (ev) => {
+          console.error("❌ Add error:", ev);
+          reject(ev);
+        };
+        tx.oncomplete = () => {
+          console.log("✅ Transaction complete");
+          resolve(true);
+        };
+        tx.onerror = (ev) => {
+          console.error("❌ Transaction failed:", ev);
+          reject(ev);
+        };
+      });
+    }
+
+    function saveToLocalStorage(asset) {
+      const key = "offlineAssets";
+      const list = JSON.parse(localStorage.getItem(key) || "[]");
+      list.push(asset);
+      localStorage.setItem(key, JSON.stringify(list));
+      console.log("💾 Saved to localStorage:", asset);
+    }
+
+    function showSuccessAndReload() {
+      document.getElementById("assetForm").style.display = "none";
+      document.getElementById("header").style.display = "none";
+      document.getElementById("successMsg").style.display = "block";
+      setTimeout(() => location.reload(), 10000);
+    }
+
+    // Initialize DB once
+    openDB();
+
+    /***** Form handler *****/
+    const form = document.getElementById("assetForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Basic front-end validation (helps avoid Kissflow 25000 errors later)
+      if (!assetStatus.value.trim()) {
+        alert("Asset Status is required.");
+        assetStatus.focus();
+        return;
+      }
 
       const asset = {
-        assetName: assetName.value,
-        assetType: assetType.value,
+        assetName: assetName.value.trim(),
+        assetType: assetType.value.trim(),
         purchaseDate: purchaseDate.value,
         warrantyExpiry: warrantyExpiry.value,
-        assetStatus: assetStatus.value,
-        assetCondition: assetCondition.value,
-        synced: false
+        assetStatus: assetStatus.value.trim(),
+        assetCondition: assetCondition.value.trim(),
+        synced: false,
+        savedAt: new Date().toISOString()
       };
-            if (useLocalStorage) {
-        let assets = JSON.parse(localStorage.getItem("offlineAssets") || "[]");
-        assets.push(asset);
-        localStorage.setItem("offlineAssets", JSON.stringify(assets));
-      } else {
 
-      const tx = db.transaction("assets", "readwrite");
-      tx.objectStore("assets").add(asset);
-}
-
-        document.getElementById("assetForm").style.display = "none";
-        document.getElementById("title").style.display = "none";
-        document.getElementById("successMsg").style.display = "block";
-
-        form.style.display = "none";   // Hide form
-        title.style.display = "none";  // Hide title
-        msg.textContent = "✅ Asset saved offline! Please sync once you are online.";
-        msg.className = "success";
-        msg.style.display = "block";
-
-        // Reload page after 10 seconds
-        setTimeout(() => location.reload(), 10000);
+      try {
+        if (useLocalStorage || !db) {
+          saveToLocalStorage(asset);
+          showSuccessAndReload();
+        } else {
+          await saveToIndexedDB(asset);
+          showSuccessAndReload();
+        }
+      } catch (err) {
+        console.error("❌ Save failed, falling back to localStorage:", err);
+        saveToLocalStorage(asset);
+        showSuccessAndReload();
+      }
     });
   </script>
 </body>
 </html>
-
-
