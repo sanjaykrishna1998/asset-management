@@ -198,8 +198,7 @@
 
     /***** Service Worker registration with cache-busting *****/
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/service-worker.js?v=" + Date.now())
+      navigator.serviceWorker.register("/service-worker.js?v=" + Date.now())
         .then(reg => {
           console.log("✅ Service Worker registered", reg.scope);
           return navigator.serviceWorker.ready;
@@ -326,3 +325,4 @@
   </script>
 </body>
 </html>
+
