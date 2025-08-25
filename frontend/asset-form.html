@@ -95,8 +95,9 @@
   </div>
 
   <script>
-    let db;
+    let db, useLocalStorage = false;
     const request = indexedDB.open("AssetDB", 1);
+    request.onerror = () => { useLocalStorage = true; };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
       db.createObjectStore("assets", { keyPath: "id", autoIncrement: true });
@@ -143,3 +144,4 @@
   </script>
 </body>
 </html>
+
