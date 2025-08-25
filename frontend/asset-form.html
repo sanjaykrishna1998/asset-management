@@ -126,7 +126,6 @@
       tx.objectStore("assets").add(asset);
 }
 
-      tx.oncomplete = () => {
         document.getElementById("assetForm").style.display = "none";
         document.getElementById("title").style.display = "none";
         document.getElementById("successMsg").style.display = "block";
@@ -139,9 +138,9 @@
 
         // Reload page after 10 seconds
         setTimeout(() => location.reload(), 10000);
-      };
     });
   </script>
 </body>
 </html>
+
 
