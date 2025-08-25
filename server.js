@@ -12,7 +12,7 @@ app.use(cors({ origin: "*" }));
 // Serve frontend files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "../frontend")));
+app.use(express.static(path.join(__dirname, "./frontend")));
 
 const KISSFLOW_URL =
   "https://development-redkitebpm.kissflow.com/form/2/Ac9wu13v4qNL/Asset_Details_A00/create/submit";
@@ -57,5 +57,5 @@ app.post("/sync-assets", async (req, res) => {
 });
 
 app.listen(PORT, () =>
-  console.log("Server running on port ${PORT}")
+  console.log(`Server running on port ${PORT}`)
 );
