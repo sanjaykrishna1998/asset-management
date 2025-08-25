@@ -103,12 +103,8 @@
     };
     request.onsuccess = (e) => { db = e.target.result; };
 
-    const form = document.getElementById("assetForm");
-    const msg = document.getElementById("message");
-    const title = document.getElementById("title");
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
+    document.getElementById("assetForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
       const asset = {
         assetName: assetName.value,
@@ -124,6 +120,10 @@
       tx.objectStore("assets").add(asset);
 
       tx.oncomplete = () => {
+        document.getElementById("assetForm").style.display = "none";
+        document.getElementById("title").style.display = "none";
+        document.getElementById("successMsg").style.display = "block";
+
         form.style.display = "none";   // Hide form
         title.style.display = "none";  // Hide title
         msg.textContent = "✅ Asset saved offline! Please sync once you are online.";
