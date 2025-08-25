@@ -115,14 +115,20 @@
         assetCondition: assetCondition.value,
         synced: false
       };
+            if (useLocalStorage) {
+        let assets = JSON.parse(localStorage.getItem("offlineAssets") || "[]");
+        assets.push(asset);
+        localStorage.setItem("offlineAssets", JSON.stringify(assets));
+      } else {
 
       const tx = db.transaction("assets", "readwrite");
       tx.objectStore("assets").add(asset);
+}
 
       tx.oncomplete = () => {
-      document.getElementById("assetForm").style.display = "none";
-      document.getElementById("title").style.display = "none";
-      document.getElementById("successMsg").style.display = "block";
+        document.getElementById("assetForm").style.display = "none";
+        document.getElementById("title").style.display = "none";
+        document.getElementById("successMsg").style.display = "block";
 
         form.style.display = "none";   // Hide form
         title.style.display = "none";  // Hide title
@@ -137,5 +143,3 @@
   </script>
 </body>
 </html>
-
-
