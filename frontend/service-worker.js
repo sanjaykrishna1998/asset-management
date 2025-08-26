@@ -3,8 +3,8 @@ const FILES_TO_CACHE = [
   "/",
   "/asset-form.html",
   "/asset-table.html",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
+  "/icon-192.png",
+  "/icon-512.png",
   "/manifest.json"
 ];
 
@@ -34,4 +34,5 @@ self.addEventListener("fetch", (e) => {
     })
   );
 });
+
 
