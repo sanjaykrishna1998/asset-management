@@ -2,325 +2,220 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-  <title>Asset Form (Offline)</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#007bff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Asset Manager">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset & Maintenance Forms</title>
   <style>
-    :root {
-      --bg: #eef2f7;
-      --card: #ffffff;
-      --primary: #007bff;
-      --primary-600: #0056b3;
-      --text: #111827;
-      --muted: #6b7280;
-      --success: #16a34a;
-      --shadow: 0 8px 24px rgba(0,0,0,.08);
-      --radius: 14px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: radial-gradient(1200px 800px at 80% -200px, #dbeafe 0%, #eef2f7 50%, #eef2f7 100%);
-      min-height: 100svh;
-      padding: 24px;
-      display: grid;
-      place-items: start center;
-    }
-    .wrap {
-      width: min(960px, 92vw);
-    }
-    header {
-      text-align: center;
-      margin: 8px 0 20px;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(22px, 3.6vw, 28px);
-      font-weight: 700;
-      letter-spacing: .2px;
-    }
-    p.sub {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
+    body { font-family: "Segoe UI", sans-serif; margin: 0; }
+    header { background: #007bff; color: white; padding: 15px; display: flex; align-items: center; }
+    header h1 { flex: 1; margin: 0; font-size: 20px; }
+    .menu-icon { cursor: pointer; font-size: 22px; margin-right: 10px; }
+    .side-menu { width: 220px; background: #007bff; color: white; position: fixed; top: 0; left: -220px; height: 100%; overflow: auto; transition: 0.3s; padding-top: 60px; }
+    .side-menu.open { left: 0; }
+    .side-menu a { padding: 12px 20px; display: block; color: white; text-decoration: none; font-weight: bold; }
+    .side-menu a:hover { background: #0056b3; }
+    main { padding: 20px; }
 
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(16px, 3.6vw, 22px);
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-
+    /* 3-column grid for forms */
     form {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px 16px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px 25px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
+
+    .full-span { grid-column: 1 / -1; }
+    form > div { display: flex; flex-direction: column; }
+    label { font-weight: bold; margin-bottom: 6px; }
+    input, select, textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    /* Save buttons */
+    button[type="submit"] {
+      font-size: 16px;
+      padding: 14px 22px;
+      align-self: flex-end;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    button[type="submit"]:hover {
+      background: #0056b3;
+    }
+
+    /* Small Add Row button */
+    button[type="button"] {
+      font-size: 14px;
+      padding: 8px 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+    button[type="button"]:hover { background: #0056b3; }
+
+    .save-btn {
+     grid-column: 1 / -1;
+     justify-self: end;
+    }
+
+    /* Remove Selected button */
+    .remove-btn {
+      background: #dc3545;
+      padding: 8px 14px;
+    }
+    .remove-btn:hover { background: #a71d2a; }
+
+    #msg { font-weight: bold; margin-top: 10px; }
+
+    /* Responsive */
     @media (max-width: 900px) {
       form { grid-template-columns: repeat(2, 1fr); }
+      .full-span { grid-column: 1 / -1; }
     }
-    @media (max-width: 620px) {
+    @media (max-width: 600px) {
       form { grid-template-columns: 1fr; }
-    }
-
-    .field { display: grid; gap: 6px; }
-    label { font-weight: 600; font-size: 14px; }
-    input, select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      background: #fff;
-      font-size: 15px;
-      outline: none;
-      transition: border-color .15s ease, box-shadow .15s ease;
-    }
-    input:focus, select:focus {
-      border-color: #93c5fd;
-      box-shadow: 0 0 0 4px #dbeafe;
-    }
-
-    .actions {
-      grid-column: 1 / -1;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 4px;
-    }
-    .btn {
-      appearance: none;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
-      transition: transform .05s ease, filter .2s ease, background .2s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { filter: brightness(1.03); }
-    .btn-primary:active { background: var(--primary-600); }
-
-    .success {
-      display: none;
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 10px;
-      background: #ecfdf5;
-      color: var(--success);
-      border: 1px solid #bbf7d0;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    footer {
-      margin-top: 14px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header id="header">
-      <h1 id="title">Add Asset</h1>
-      <p class="sub">Fill the form below. It saves to your device when offline and you can sync later.</p>
-    </header>
+  <header>
+    <span class="menu-icon" onclick="toggleMenu()">☰</span>
+    <h1>Asset Management System</h1>
+  </header>
 
-    <section class="card" id="formCard">
-      <form id="assetForm" autocomplete="off">
-        <div class="field">
-          <label for="assetName">Asset Name</label>
-          <input type="text" id="assetName" required placeholder="e.g., Laser Printer" />
-        </div>
-
-        <div class="field">
-          <label for="assetType">Asset Type</label>
-          <input type="text" id="assetType" required placeholder="e.g., Hardware" />
-        </div>
-
-        <div class="field">
-          <label for="purchaseDate">Purchase Date</label>
-          <input type="date" id="purchaseDate" required />
-        </div>
-
-        <div class="field">
-          <label for="warrantyExpiry">Warranty Expiry</label>
-          <input type="date" id="warrantyExpiry" required />
-        </div>
-
-        <div class="field">
-          <label for="assetStatus">Asset Status</label>
-          <input type="text" id="assetStatus" required placeholder="e.g., Active" />
-        </div>
-
-        <div class="field">
-          <label for="assetCondition">Asset Condition</label>
-          <input type="text" id="assetCondition" required placeholder="e.g., Good" />
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-primary" type="submit">💾 Save Offline</button>
-        </div>
-      </form>
-
-      <div class="success" id="successMsg">
-        ✅ Saved to offline storage. Please sync when you’re online. This page will refresh in 10 seconds.
-      </div>
-    </section>
-
+  <!-- Side Menu -->
+  <div id="menu" class="side-menu">
+    <a href="#" onclick="showForm('asset')"> Add Asset</a>
+    <a href="#" onclick="showForm('maintenance')"> Add Maintenance</a>
   </div>
 
-  <script>
-    /***** Connectivity logs (helpful while testing) *****/
-    window.addEventListener("online",  () => console.log("📶 Online"));
-    window.addEventListener("offline", () => console.log("🚫 Offline"));
+  <main>
+    <!-- Asset Form -->
+<!-- Asset Form -->
+<form id="assetForm">
+  <div><label>Asset ID</label><input type="text" id="assetId" required></div>
 
-    /***** Service Worker registration with cache-busting *****/
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/service-worker.js?v=" + Date.now())
-        .then(reg => {
-          console.log("✅ Service Worker registered", reg.scope);
-          return navigator.serviceWorker.ready;
-        })
-        .then(() => console.log("✅ Service Worker ready"))
-        .catch(err => console.error("❌ SW registration failed:", err));
-    } else {
-      console.warn("Service Worker not supported in this browser");
-    }
+  <div>
+    <label>Asset Picture 1</label>
+    <input type="file" id="assetPic1" accept="image/*" />
+  </div>
 
-    /***** IndexedDB (with localStorage fallback) *****/
-    let db = null;
-    let useLocalStorage = false;
+  <div>
+    <label>Asset Picture 2</label>
+    <input type="file" id="assetPic2" accept="image/*" />
+  </div>
 
-    function openDB() {
-      return new Promise((resolve) => {
-        if (!("indexedDB" in window)) {
-          console.warn("IndexedDB not supported. Falling back to localStorage.");
-          useLocalStorage = true;
-          return resolve(null);
-        }
-        const req = indexedDB.open("AssetDB", 1);
+  <div>
+    <label>Asset Picture 3</label>
+    <input type="file" id="assetPic3" accept="image/*" />
+  </div>
 
-        req.onerror = (e) => {
-          console.error("❌ IndexedDB open error:", e);
-          useLocalStorage = true;
-          resolve(null);
-        };
+  <div>
+    <label>Asset Picture 4</label>
+    <input type="file" id="assetPic4" accept="image/*" />
+  </div>
 
-        req.onupgradeneeded = (e) => {
-          const _db = e.target.result;
-          if (!_db.objectStoreNames.contains("assets")) {
-            _db.createObjectStore("assets", { keyPath: "id", autoIncrement: true });
-          }
-        };
+  <div class="full-span" style="text-align:right; margin-top:20px;">
+    <button type="submit" class="save-btn">Save Asset</button>
+  </div>
+</form>
 
-        req.onsuccess = (e) => {
-          db = e.target.result;
-          console.log("✅ IndexedDB opened");
-          resolve(db);
-        };
-      });
-    }
 
-    function saveToIndexedDB(asset) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction("assets", "readwrite");
-        const store = tx.objectStore("assets");
-        const addReq = store.add(asset);
+<!-- Maintenance Form -->
+<form id="maintenanceForm" style="display:none;">
+  <div><label>Board ID</label><input type="text" id="boardID" required></div>
+  <div>
+    <label>Status ID</label>
+    <select id="statusID">
+      <option value="">-- Select Status ID --</option>
+      <option value="Status_0001_New">Status_0001_New</option>
+      <option value="Status_0001_InProgress">Status_0001_InProgress</option>
+    </select>
+  </div>
+  <div><label>Item ID</label><input type="text" id="itemID" required></div>
 
-        addReq.onsuccess = () => {
-          console.log("💾 Added to IndexedDB:", asset);
-        };
-        addReq.onerror = (ev) => {
-          console.error("❌ Add error:", ev);
-          reject(ev);
-        };
-        tx.oncomplete = () => {
-          console.log("✅ Transaction complete");
-          resolve(true);
-        };
-        tx.onerror = (ev) => {
-          console.error("❌ Transaction failed:", ev);
-          reject(ev);
-        };
-      });
-    }
+  <div class="full-span">
+    <label for="problemDescription">Problem Description</label>
+    <textarea id="problemDescription" rows="3" placeholder="Enter Problem Description details..."></textarea>
+  </div>
 
-    function saveToLocalStorage(asset) {
-      const key = "offlineAssets";
-      const list = JSON.parse(localStorage.getItem(key) || "[]");
-      list.push(asset);
-      localStorage.setItem(key, JSON.stringify(list));
-      console.log("💾 Saved to localStorage:", asset);
-    }
+  <div class="full-span">
+    <label for="workNote">Work Notes</label>
+    <textarea id="workNote" rows="3" placeholder="Enter Work Notes details..."></textarea>
+  </div>
 
-    function showSuccessAndReload() {
-      document.getElementById("assetForm").style.display = "none";
-      document.getElementById("header").style.display = "none";
-      document.getElementById("successMsg").style.display = "block";
-      setTimeout(() => location.reload(), 10000);
-    }
 
-    // Initialize DB once
-    openDB();
+  <!-- Replacement Parts Section -->
+  <h2 style="grid-column:1 / -1; margin-top:20px;">Select Replacement Parts</h2>
+  <div style="grid-column:1 / -1; display: flex; flex-direction: column; gap:5px;">
+    <table id="partsTable" style="width:100%; border-collapse: collapse; margin-bottom:10px;">
+      <thead>
+        <tr style="background:#f1f1f1;">
+          <th style="padding:8px; border:1px solid #ccc;">Select</th>
+          <th style="padding:8px; border:1px solid #ccc;">Item ID</th>
+          <th style="padding:8px; border:1px solid #ccc;">Stock Availability</th>
+          <th style="padding:8px; border:1px solid #ccc;">Required Quantity</th>
+          <th style="padding:8px; border:1px solid #ccc;">Inventory Unique ID</th>
+        </tr>
+      </thead>
+      <tbody id="partsBody"></tbody>
+    </table>
 
-    /***** Form handler *****/
-    const form = document.getElementById("assetForm");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    <div style="display:flex; justify-content: space-between;">
+      <button type="button" onclick="addRow()">➕ Add Row</button>
+      <button type="button" class="remove-btn" onclick="removeSelectedRows()">❌ Remove Selected</button>
+    </div>
+  </div>
 
-      // Basic front-end validation (helps avoid Kissflow 25000 errors later)
-      if (!assetStatus.value.trim()) {
-        alert("Asset Status is required.");
-        assetStatus.focus();
-        return;
-      }
 
-      const asset = {
-        assetName: assetName.value.trim(),
-        assetType: assetType.value.trim(),
-        purchaseDate: purchaseDate.value,
-        warrantyExpiry: warrantyExpiry.value,
-        assetStatus: assetStatus.value.trim(),
-        assetCondition: assetCondition.value.trim(),
-        synced: false,
-        savedAt: new Date().toISOString()
-      };
+  <!-- ✅ New Observation Section -->
+  <h2 style="grid-column:1 / -1; margin-top:20px;">Post Observation</h2>
+  <div>
+    <label for="observations">Observations</label>
+    <textarea id="observations" rows="3" placeholder="Enter observations..."></textarea>
+  </div>
+  <div>
+    <label for="actionsTaken">Actions Taken</label>
+    <textarea id="actionsTaken" rows="3" placeholder="Enter actions taken..."></textarea>
+  </div>
+  <div>
+    <label for="maintenancePhotos">Maintenance Photos</label>
+    <input type="file" id="maintenancePhotos" accept="image/*" multiple>
+  </div>
+  <div>
+    <label for="supportingDocs">Supporting Documents</label>
+    <input type="file" id="supportingDocs" multiple>
+  </div>
 
-      try {
-        if (useLocalStorage || !db) {
-          saveToLocalStorage(asset);
-          showSuccessAndReload();
-        } else {
-          await saveToIndexedDB(asset);
-          showSuccessAndReload();
-        }
-      } catch (err) {
-        console.error("❌ Save failed, falling back to localStorage:", err);
-        saveToLocalStorage(asset);
-        showSuccessAndReload();
-      }
-    });
-  </script>
+  <div class="full-span" style="text-align:right; margin-top:20px;">
+    <button type="submit" class="save-btn">Save Task</button>
+  </div>
+</form>
+
+
+    <p id="msg"></p>
+  </main>
+
+  <!-- External Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/assetForm.js"></script>
+  <script src="js/maintenanceForm.js"></script>
 </body>
 </html>
-
-
