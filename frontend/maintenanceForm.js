@@ -39,9 +39,7 @@ function addRow() {
         ${options}
       </select>
     </td>
-    <td style="border:1px solid #ccc;"><input type="number" placeholder="Stock"></td>
     <td style="border:1px solid #ccc;"><input type="number" placeholder="Qty"></td>
-    <td style="border:1px solid #ccc;"><input type="text" placeholder="Inventory ID"></td>
   `;
   tbody.appendChild(newRow);
 }
@@ -130,3 +128,4 @@ document.addEventListener("DOMContentLoaded", function () {
     addRow();
   });
 });
+
