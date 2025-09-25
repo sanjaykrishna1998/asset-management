@@ -1,116 +1,59 @@
+// IndexedDB setup
 const dbName = "KissflowDB";
-const dbVersion = 2; // bump version if needed
 let db;
 
-const refreshBtn = document.getElementById("refreshBtn");
-refreshBtn.disabled = true;
+const request = indexedDB.open(dbName, 1);
+request.onupgradeneeded = e => {
+  db = e.target.result;
+  db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
+};
+request.onsuccess = e => {
+  db = e.target.result;
+  // Load any existing data on page load
+  loadFromDB();
+};
 
-// ---------- DB Ready ----------
-const dbReady = new Promise((resolve, reject) => {
-  const request = indexedDB.open(dbName, dbVersion);
-
-  request.onupgradeneeded = e => {
-    db = e.target.result;
-    console.log("Upgrading DB to version", db.version);
-
-    if (!db.objectStoreNames.contains("items")) {
-      db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
-      console.log("Created 'items' store");
-    }
-    if (!db.objectStoreNames.contains("maintenance")) {
-      db.createObjectStore("maintenance", { keyPath: "id", autoIncrement: true });
-      console.log("Created 'maintenance' store");
-    }
-  };
-
-  request.onsuccess = e => {
-    db = e.target.result;
-
-    db.onversionchange = () => {
-      db.close();
-      alert("Database is outdated, please reload the page.");
-    };
-
-    refreshBtn.disabled = false;
-    resolve(db);
-  };
-
-  request.onerror = e => reject(e.target.error);
-});
-
-// ---------- Safe DB helper ----------
-async function withDB() {
-  if (db) return db;
-  return await dbReady;
-}
-
-// ---------- Save items to IndexedDB ----------
-async function saveItemsToDB(ids) {
-  const db = await withDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("items", "readwrite");
-    const store = tx.objectStore("items");
-
-    store.clear(); // clear existing items
-    for (const id of ids) store.add({ itemId: id });
-
-    tx.oncomplete = () => resolve();
-    tx.onerror = e => reject(e.target.error);
-    tx.onabort = e => reject(e.target.error);
-  });
-}
-
-// ---------- Load from DB ----------
-async function loadFromDB() {
-  const db = await withDB();
-  const tx = db.transaction("items", "readonly");
-  const store = tx.objectStore("items");
-  const req = store.getAll();
-
-  req.onsuccess = () => {
-    const ids = req.result.map(r => r.itemId);
-    populateDropdown(ids);
-    setStatus(ids.length ? "Loaded cached data" : "No cached data");
-  };
-
-  req.onerror = e => {
-    console.error("Failed to load from DB", e.target.error);
-    setStatus("Error loading cached data");
-  };
-}
-
-
-// ---------- Update status ----------
-function setStatus(msg) {
-  const statusEl = document.getElementById("status");
-  if (statusEl) statusEl.textContent = msg;
-}
-
-// ---------- Refresh from API ----------
-async function refreshFromAPI() {
-  refreshBtn.disabled = true;
-  refreshBtn.textContent = "Refreshing…";
-
+async function fetchItemIds() {
+  const btn = document.getElementById("refreshBtn");
+  btn.disabled = true;
+  btn.textContent = "Fetching…";
   try {
     const res = await fetch("/api/itemids");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const ids = await res.json();
 
-    await saveItemsToDB(ids);
-    populateDropdown(ids);
-    setStatus("Online: updated from API");
+    const tx = db.transaction("items", "readwrite");
+    const store = tx.objectStore("items");
+    store.clear();
+    ids.forEach(id => store.add({ itemId: id }));
+    await tx.done;
+
+    display(ids);
   } catch (err) {
-    console.warn("API fetch failed:", err);
-    setStatus("Offline: showing cached data");
+    console.error("Fetch/store error:", err);
+    alert("Failed to fetch data. See console for details.");
   } finally {
-    refreshBtn.disabled = false;
-    refreshBtn.textContent = "Refresh from API";
+    btn.disabled = false;
+    btn.textContent = "Fetch Item_ID_1";
   }
 }
 
-// ---------- Event listeners ----------
-refreshBtn.addEventListener("click", refreshFromAPI);
+function loadFromDB() {
+  const tx = db.transaction("items", "readonly");
+  const store = tx.objectStore("items");
+  const req = store.getAll();
+  req.onsuccess = () => {
+    const ids = req.result.map(r => r.itemId);
+    display(ids);
+  };
+}
 
-// Load cached data on startup
-loadFromDB();
+function display(ids) {
+  const list = document.getElementById("itemList");
+  list.innerHTML = ids.length
+    ? ids.map(id => `<li>${id}</li>`).join("")
+    : "<li>No data yet. Click Fetch Item_ID_1.</li>";
+}
 
+document.getElementById("refreshBtn")
+        .addEventListener("click", fetchItemIds);
