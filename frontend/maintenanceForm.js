@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const task = {
       boardID: document.getElementById("boardID").value,
       statusID: document.getElementById("statusID").value,
+      usersEmail: document.getElementById("usersEmail").value,
       itemID: document.getElementById("itemID").value,
       problemDescription: document.getElementById("problemDescription").value,
       workNote: document.getElementById("workNote").value,
@@ -132,4 +133,5 @@ document.addEventListener("DOMContentLoaded", function () {
     addRow();
   });
 });
+
 
