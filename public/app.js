@@ -1,81 +1,81 @@
-const DB_NAME = "KissflowDB";
-const DB_VERSION = 3;           // bump version if schema changes
-const STORE_NAME = "items";
+const dbName = "KissflowDB";
+let db;
 
-let db; // will hold database connection
-
-// Open the database
-const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-request.onupgradeneeded = e => {
-  const upgradeDb = e.target.result;
-  if (!upgradeDb.objectStoreNames.contains(STORE_NAME)) {
-    upgradeDb.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
-  }
-};
-
-request.onsuccess = e => {
+const req = indexedDB.open(dbName, 1);
+req.onupgradeneeded = e => {
   db = e.target.result;
-  console.log("✅ DB opened:", DB_NAME);
-
-  // Enable the button and attach listener only when DB is ready
-  const btn = document.getElementById("refreshBtn");
-  btn.disabled = false;
-  btn.addEventListener("click", fetchItemIds);
-
-  // Load existing data
+  db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
+};
+req.onsuccess = e => {
+  db = e.target.result;
+  // ✅ Always load cached data first
   loadFromDB();
 };
 
-request.onerror = e => {
-  console.error("❌ DB open error:", e.target.error);
-};
-
-async function fetchItemIds() {
-  // db is guaranteed to exist because we add the listener only after onsuccess
+// ---------- Fetch and store (optional refresh) ----------
+async function refreshFromAPI() {
   const btn = document.getElementById("refreshBtn");
   btn.disabled = true;
-  btn.textContent = "Fetching…";
-
+  btn.textContent = "Refreshing…";
   try {
-    // Replace with your actual endpoint
     const res = await fetch("/api/itemids");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const ids = await res.json(); // expects e.g. ["Item_ID_1", "Item_ID_2"]
+    const ids = await res.json();
 
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
+    // Save to IndexedDB
+    const tx = db.transaction("items", "readwrite");
+    const store = tx.objectStore("items");
     store.clear();
     ids.forEach(id => store.add({ itemId: id }));
-    tx.oncomplete = () => {
-      console.log("✅ Data stored in IndexedDB");
-      display(ids);
-    };
-    tx.onerror = e => console.error("Transaction error:", e.target.error);
+    await tx.done;
 
+    populateDropdown(ids);
+    setStatus("Online: updated from API");
   } catch (err) {
-    console.error("Fetch/store error:", err);
-    alert("Failed to fetch data. See console for details.");
+    console.warn("API fetch failed (offline or error):", err);
+    setStatus("Offline: showing cached data");
+    // ❗ No need to repopulate, the cached data is already loaded
   } finally {
     btn.disabled = false;
-    btn.textContent = "Fetch Item_ID_1";
+    btn.textContent = "Refresh from API";
   }
 }
 
+// ---------- Load from IndexedDB ----------
 function loadFromDB() {
-  const tx = db.transaction(STORE_NAME, "readonly");
-  const store = tx.objectStore(STORE_NAME);
+  const tx = db.transaction("items", "readonly");
+  const store = tx.objectStore("items");
   const req = store.getAll();
   req.onsuccess = () => {
     const ids = req.result.map(r => r.itemId);
-    display(ids);
+    populateDropdown(ids);
+    setStatus(ids.length ? "Loaded cached data" : "No cached data");
   };
-  req.onerror = e => console.error("Load error:", e.target.error);
 }
 
-function display(ids) {
-  const list = document.getElementById("itemList");
-  list.innerHTML = ids.length
-    ? ids.map(id => `<li>${id}</li>`).join("")
-    : "<li>No data yet. Click Fetch Item_ID_1.</li>";
+// ---------- UI helpers ----------
+function populateDropdown(ids) {
+  const select = document.getElementById("itemSelect");
+  select.innerHTML = "";
+  if (ids.length) {
+    select.append(new Option("-- Select Item --", ""));
+    ids.forEach(id => select.append(new Option(id, id)));
+  } else {
+    select.append(new Option("No data available", ""));
+  }
 }
+
+function setStatus(msg) {
+  document.getElementById("status").textContent = msg;
+}
+
+// ---------- Form ----------
+document.getElementById("itemForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const val = document.getElementById("itemSelect").value;
+  document.getElementById("result").textContent =
+    val ? `You selected: ${val}` : "Please select an item.";
+});
+
+// ---------- Refresh button ----------
+document.getElementById("refreshBtn").addEventListener("click", refreshFromAPI);
