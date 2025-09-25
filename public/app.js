@@ -1,14 +1,16 @@
 const dbName = "KissflowDB";
 let db;
+const refreshBtn = document.getElementById("refreshBtn");
+refreshBtn.disabled = true;
 
-// ---------- IndexedDB setup ----------
+// ---------- DB Ready Promise ----------
 const dbReady = new Promise((resolve, reject) => {
-  const req = indexedDB.open(dbName, 1);
+  const request = indexedDB.open(dbName, 1);
 
-  req.onupgradeneeded = e => {
+  request.onupgradeneeded = e => {
     db = e.target.result;
 
-    // Create stores if not exist
+    // Ensure stores exist
     if (!db.objectStoreNames.contains("items")) {
       db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
     }
@@ -17,31 +19,31 @@ const dbReady = new Promise((resolve, reject) => {
     }
   };
 
-  req.onsuccess = e => {
+  request.onsuccess = e => {
     db = e.target.result;
-    resolve();
+
+    // Check again that store exists
+    if (!db.objectStoreNames.contains("items")) {
+      reject(new Error("Items store not found after DB open"));
+      return;
+    }
+
+    resolve(db);
   };
 
-  req.onerror = e => reject(e.target.error);
+  request.onerror = e => reject(e.target.error);
 });
 
-// ---------- Elements ----------
-const refreshBtn = document.getElementById("refreshBtn");
-refreshBtn.disabled = true;
+// ---------- Safe helper: wait for DB ----------
+async function withDB() {
+  if (db) return db;
+  return await dbReady;
+}
 
-// ---------- Wait for DB ready ----------
-dbReady
-  .then(() => {
-    // Only call loadFromDB AFTER db is fully ready
-    loadFromDB();
-    refreshBtn.disabled = false;
-  })
-  .catch(err => console.error("Failed to open DB:", err));
-
-// ---------- Save Item IDs ----------
-function saveItemsToDB(ids) {
+// ---------- Save items to IndexedDB ----------
+async function saveItemsToDB(ids) {
+  const db = await withDB();
   return new Promise((resolve, reject) => {
-    if (!db) return reject(new Error("DB not initialized"));
     const tx = db.transaction("items", "readwrite");
     const store = tx.objectStore("items");
 
@@ -54,9 +56,10 @@ function saveItemsToDB(ids) {
   });
 }
 
-// ---------- Load cached items ----------
-function loadFromDB() {
-  if (!db) return; // safety check
+// ---------- Load items from IndexedDB ----------
+async function loadFromDB() {
+  const db = await withDB();
+
   if (!db.objectStoreNames.contains("items")) {
     console.warn("Items store not found in DB yet.");
     return;
@@ -64,15 +67,15 @@ function loadFromDB() {
 
   const tx = db.transaction("items", "readonly");
   const store = tx.objectStore("items");
-  const req = store.getAll();
+  const request = store.getAll();
 
-  req.onsuccess = () => {
-    const ids = req.result.map(r => r.itemId);
+  request.onsuccess = () => {
+    const ids = request.result.map(r => r.itemId);
     populateDropdown(ids);
     setStatus(ids.length ? "Loaded cached data" : "No cached data");
   };
 
-  req.onerror = e => {
+  request.onerror = e => {
     console.error("Failed to load from IndexedDB", e.target.error);
     setStatus("Error loading cached data");
   };
@@ -114,11 +117,16 @@ function populateDropdown(ids) {
   }
 }
 
-// ---------- Update status ----------
+// ---------- Status ----------
 function setStatus(msg) {
   const statusEl = document.getElementById("status");
   if (statusEl) statusEl.textContent = msg;
 }
 
-// ---------- Event listeners ----------
+// ---------- Event listener ----------
 refreshBtn.addEventListener("click", refreshFromAPI);
+
+// ---------- Init ----------
+dbReady
+  .then(() => loadFromDB())
+  .catch(err => console.error("Failed to initialize DB:", err));
