@@ -1,8 +1,32 @@
-// ==========================
-// Add & Remove Parts Rows
-// ==========================
+let cachedItemIds = [];
+
+// Load item IDs from IndexedDB as soon as DOM is ready
+document.addEventListener("DOMContentLoaded", async () => {
+  // Open the same DB where your /kissflow-items sync stores data
+  const openReq = indexedDB.open("KissflowDB", 1);
+  openReq.onsuccess = (e) => {
+    const idb = e.target.result;
+    const tx = idb.transaction("items", "readonly");
+    const store = tx.objectStore("items");
+    const getAll = store.getAll();
+
+    getAll.onsuccess = () => {
+      // each record is { itemId: "…" }
+      cachedItemIds = getAll.result.map(r => r.itemId);
+      // Make sure at least one row exists *after* we have the item list
+      if (document.getElementById("partsBody").children.length === 0) addRow();
+    };
+  };
+});
+
+// Create a <tr> with a dropdown built from cachedItemIds
 function addRow() {
   const tbody = document.getElementById("partsBody");
+
+  // Build the <option> list from cachedItemIds
+  const options = cachedItemIds.length
+    ? cachedItemIds.map(id => `<option value="${id}">${id}</option>`).join("")
+    : "<option value=''>-- No items yet --</option>";
 
   const newRow = document.createElement("tr");
   newRow.innerHTML = `
@@ -12,12 +36,7 @@ function addRow() {
     <td style="border:1px solid #ccc;">
       <select>
         <option value="">-- Select Item --</option>
-        <option value="CNS-AIR-PRE-CO-01">CNS-AIR-PRE-CO-01</option>
-        <option value="LAB-MICRO-001">LAB-MICRO-001</option>
-        <option value="IT-LAPTOP-002">IT-LAPTOP-002</option>
-        <option value="EQP-BIOSAFETY-005">EQP-BIOSAFETY-005</option>
-        <option value="EQP-FREEZER-010">EQP-FREEZER-010</option>
-        <option value="GEN-PRINTER-003">GEN-PRINTER-003</option>
+        ${options}
       </select>
     </td>
     <td style="border:1px solid #ccc;"><input type="number" placeholder="Stock"></td>
@@ -63,8 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const task = {
       boardID: document.getElementById("boardID").value,
       statusID: document.getElementById("statusID").value,
-      itemID: document.getElementById("itemID").value,
-      problemDescription: document.getElementById("problemDescription").value,
+      usersEmail: document.getElementById("usersEmail").value,
       workNote: document.getElementById("workNote").value,
       observations: document.getElementById("observations").value,
       actionsTaken: document.getElementById("actionsTaken").value,

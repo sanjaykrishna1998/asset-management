@@ -44,8 +44,8 @@ function renderTable(type, records) {
     // (unchanged maintenance section)
     headHTML = `
       <tr>
-        <th>Board ID</th><th>Status ID</th><th>Item ID</th>
-        <th>Problem Description</th><th>Work Note</th>
+        <th>Board ID</th><th>Status ID</th><th>User's Email</th>
+        <th>Work Note</th>
         <th>Observations</th><th>Actions Taken</th>
         <th>Maintenance Photos</th><th>Supporting Documents</th>
         <th>Parts</th><th>Synced?</th>
@@ -55,14 +55,12 @@ function renderTable(type, records) {
       const partsHTML = r.parts && r.parts.length > 0
         ? `<table style="border-collapse:collapse; width:100%; font-size:12px;">
             <tr style="background:#eee;">
-              <th>Item ID</th><th>Stock</th><th>Qty</th><th>Inventory ID</th>
+              <th>Item ID</th><th>Qty</th>
             </tr>
             ${r.parts.map(p => `
               <tr>
                 <td>${p.itemId || ""}</td>
-                <td>${p.stockAvailability || ""}</td>
                 <td>${p.requiredQuantity || ""}</td>
-                <td>${p.inventoryId || ""}</td>
               </tr>
             `).join("")}
           </table>`
@@ -79,8 +77,7 @@ function renderTable(type, records) {
         <tr>
           <td>${r.boardID || ""}</td>
           <td>${r.statusID || ""}</td>
-          <td>${r.itemID || ""}</td>
-          <td>${r.problemDescription || ""}</td>
+          <td>${r.usersEmail || ""}</td>
           <td>${r.workNote || ""}</td>
           <td>${r.observations || ""}</td>
           <td>${r.actionsTaken || ""}</td>
@@ -96,4 +93,23 @@ function renderTable(type, records) {
   document.getElementById("tableHead").innerHTML = headHTML;
   document.getElementById("recordsTable").innerHTML =
     bodyHTML || `<tr><td colspan="20">No records found</td></tr>`;
+}
+
+function showProgress(total) {
+  const container = document.getElementById("syncProgressContainer");
+  const bar = document.getElementById("syncProgressBar");
+  container.style.display = "block";
+  bar.style.width = "0%";
+  bar.textContent = `0 / ${total}`;
+}
+
+function updateProgress(done, total) {
+  const bar = document.getElementById("syncProgressBar");
+  const percent = Math.round((done / total) * 100);
+  bar.style.width = percent + "%";
+  bar.textContent = `${done} / ${total}`;
+}
+
+function hideProgress() {
+  document.getElementById("syncProgressContainer").style.display = "none";
 }
