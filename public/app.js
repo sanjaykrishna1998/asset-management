@@ -79,18 +79,6 @@ async function loadFromDB() {
   };
 }
 
-// ---------- Populate dropdown ----------
-function populateDropdown(ids) {
-  const select = document.getElementById("itemSelect");
-  select.innerHTML = "";
-
-  if (ids.length) {
-    select.append(new Option("-- Select Item --", ""));
-    ids.forEach(id => select.append(new Option(id, id)));
-  } else {
-    select.append(new Option("No data available", ""));
-  }
-}
 
 // ---------- Update status ----------
 function setStatus(msg) {
@@ -125,3 +113,4 @@ refreshBtn.addEventListener("click", refreshFromAPI);
 
 // Load cached data on startup
 loadFromDB();
+
