@@ -1,34 +1,51 @@
+<button id="refreshBtn">Fetch Item_ID_1</button>
+<ul id="itemList"></ul>
+
+<script>
+// ========================
 // IndexedDB setup
+// ========================
 const dbName = "KissflowDB";
 let db;
 
 const request = indexedDB.open(dbName, 1);
+
 request.onupgradeneeded = e => {
   db = e.target.result;
-  db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
-};
-request.onsuccess = e => {
-  db = e.target.result;
-  // Load any existing data on page load
-  loadFromDB();
+  // keyPath is the property we will actually store: itemId
+  if (!db.objectStoreNames.contains("items")) {
+    db.createObjectStore("items", { keyPath: "itemId" });
+  }
 };
 
+request.onsuccess = e => {
+  db = e.target.result;
+  loadFromDB();  // Load any cached data on page load
+};
+
+// ========================
+// Fetch from API & store
+// ========================
 async function fetchItemIds() {
   const btn = document.getElementById("refreshBtn");
   btn.disabled = true;
   btn.textContent = "Fetching…";
+
   try {
-    const res = await fetch("/api/itemids");
+    const res = await fetch("/api/itemids"); // must return JSON array
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const ids = await res.json();
+    const ids = await res.json();  // e.g. ["Item_ID_1", "Item_ID_1", ...]
+
+    // Filter only Item_ID_1 if API sends more
+    const filtered = ids.filter(x => x === "Item_ID_1");
 
     const tx = db.transaction("items", "readwrite");
     const store = tx.objectStore("items");
     store.clear();
-    ids.forEach(id => store.add({ itemId: id }));
-    await tx.done;
+    filtered.forEach(itemId => store.put({ itemId }));  // keyPath matches
 
-    display(ids);
+    tx.oncomplete = () => display(filtered);
+    tx.onerror = e => console.error("TX error", e.target.error);
   } catch (err) {
     console.error("Fetch/store error:", err);
     alert("Failed to fetch data. See console for details.");
@@ -38,6 +55,9 @@ async function fetchItemIds() {
   }
 }
 
+// ========================
+// Load from IndexedDB
+// ========================
 function loadFromDB() {
   const tx = db.transaction("items", "readonly");
   const store = tx.objectStore("items");
@@ -48,6 +68,9 @@ function loadFromDB() {
   };
 }
 
+// ========================
+// Render list
+// ========================
 function display(ids) {
   const list = document.getElementById("itemList");
   list.innerHTML = ids.length
@@ -55,5 +78,6 @@ function display(ids) {
     : "<li>No data yet. Click Fetch Item_ID_1.</li>";
 }
 
-document.getElementById("refreshBtn")
-        .addEventListener("click", fetchItemIds);
+// Button listener
+document.getElementById("refreshBtn").addEventListener("click", fetchItemIds);
+</script>
