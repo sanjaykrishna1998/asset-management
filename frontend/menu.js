@@ -17,3 +17,5 @@ function showForm(type) {
   // close menu after clicking a link
   document.getElementById("menu").classList.remove("open");
 }
+
+
