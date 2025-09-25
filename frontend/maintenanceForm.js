@@ -84,7 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
       boardID: document.getElementById("boardID").value,
       statusID: document.getElementById("statusID").value,
       usersEmail: document.getElementById("usersEmail").value,
-      problemDescription: document.getElementById("problemDescription").value,
       workNote: document.getElementById("workNote").value,
       observations: document.getElementById("observations").value,
       actionsTaken: document.getElementById("actionsTaken").value,
@@ -103,16 +102,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Collect parts table rows
     document.querySelectorAll("#partsBody tr").forEach(row => {
       const itemId = row.querySelector("select")?.value || "";
-      const stock = row.querySelector("input[placeholder='Stock']")?.value || "";
       const qty   = row.querySelector("input[placeholder='Qty']")?.value || "";
-      const invId = row.querySelector("input[placeholder='Inventory ID']")?.value || "";
 
       if (itemId || qty || stock || invId) {
         task.parts.push({
           itemId,
-          stockAvailability: stock,
-          requiredQuantity: qty,
-          inventoryId: invId
+          requiredQuantity: qty
         });
       }
     });
@@ -132,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addRow();
   });
 });
+
 
 
 
