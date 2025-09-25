@@ -198,8 +198,7 @@ app.post(
             "X-Access-Key-Secret": ACCESS_SECRET,
           },
           body: JSON.stringify({
-            Item_ID: req.body.itemID,
-            Problem_Description: req.body.problemDescription,
+            Agents_Email: req.body.usersEmail,
             Work_Notes: req.body.workNote,
             Observations: req.body.observations,
             Actions_Taken: req.body.actionsTaken,
@@ -284,4 +283,5 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
