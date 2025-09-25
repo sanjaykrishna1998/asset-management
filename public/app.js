@@ -1,8 +1,4 @@
 
-<script>
-// ========================
-// IndexedDB setup
-// ========================
 const dbName = "KissflowDB";
 let db;
 
@@ -78,5 +74,5 @@ function display(ids) {
 
 // Button listener
 document.getElementById("refreshBtn").addEventListener("click", fetchItemIds);
-</script>
+
 
