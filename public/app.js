@@ -1,70 +1,81 @@
+// ----------------------
+// IndexedDB Setup
+// ----------------------
+const DB_NAME = "KissflowDB";
+const DB_VERSION = 2;           // bump version to force upgrade if schema changes
+const STORE_NAME = "items";
 
-const dbName = "KissflowDB";
 let db;
 
-const request = indexedDB.open(dbName, 1);
+// Open DB
+const request = indexedDB.open(DB_NAME, DB_VERSION);
 
 request.onupgradeneeded = e => {
-  db = e.target.result;
-  // keyPath is the property we will actually store: itemId
-  if (!db.objectStoreNames.contains("items")) {
-    db.createObjectStore("items", { keyPath: "itemId" });
+  const upgradeDb = e.target.result;
+  // Create store if it doesn’t exist
+  if (!upgradeDb.objectStoreNames.contains(STORE_NAME)) {
+    upgradeDb.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
   }
 };
 
 request.onsuccess = e => {
   db = e.target.result;
-  loadFromDB();  // Load any cached data on page load
+  console.log("✅ DB opened:", DB_NAME);
+  loadFromDB();
 };
 
-// ========================
-// Fetch from API & store
-// ========================
+request.onerror = e => {
+  console.error("❌ DB open error:", e.target.error);
+};
+
+// ----------------------
+// Fetch from server and store
+// ----------------------
 async function fetchItemIds() {
   const btn = document.getElementById("refreshBtn");
   btn.disabled = true;
   btn.textContent = "Fetching…";
 
   try {
-    const res = await fetch("/api/itemids"); // must return JSON array
+    // Example: adjust to your own endpoint that returns e.g. ["Item_ID_1", "Item_ID_1"]
+    const res = await fetch("/api/itemids");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const ids = await res.json();  // e.g. ["Item_ID_1", "Item_ID_1", ...]
+    const ids = await res.json(); // expects an array of strings
 
-    // Filter only Item_ID_1 if API sends more
-    const filtered = ids.filter(x => x === "Item_ID_1");
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    store.clear();                        // clear old data
+    ids.forEach(id => store.add({ itemId: id }));
+    await tx.done;                         // wait until transaction complete
 
-    const tx = db.transaction("items", "readwrite");
-    const store = tx.objectStore("items");
-    store.clear();
-    filtered.forEach(itemId => store.put({ itemId }));  // keyPath matches
-
-    tx.oncomplete = () => display(filtered);
-    tx.onerror = e => console.error("TX error", e.target.error);
+    display(ids);
   } catch (err) {
     console.error("Fetch/store error:", err);
-    alert("Failed to fetch data. See console for details.");
+    alert("Failed to fetch data. Check console for details.");
   } finally {
     btn.disabled = false;
     btn.textContent = "Fetch Item_ID_1";
   }
 }
 
-// ========================
-// Load from IndexedDB
-// ========================
+// ----------------------
+// Load from IndexedDB on page load
+// ----------------------
 function loadFromDB() {
-  const tx = db.transaction("items", "readonly");
-  const store = tx.objectStore("items");
+  if (!db) return;
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
   const req = store.getAll();
   req.onsuccess = () => {
     const ids = req.result.map(r => r.itemId);
     display(ids);
   };
+  req.onerror = e => console.error("Load error:", e.target.error);
 }
 
-// ========================
-// Render list
-// ========================
+// ----------------------
+// Display helper
+// ----------------------
 function display(ids) {
   const list = document.getElementById("itemList");
   list.innerHTML = ids.length
@@ -74,5 +85,3 @@ function display(ids) {
 
 // Button listener
 document.getElementById("refreshBtn").addEventListener("click", fetchItemIds);
-
-
