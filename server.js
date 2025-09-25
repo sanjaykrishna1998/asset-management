@@ -83,7 +83,7 @@ app.post(
     try {
       const { assetId, fieldId1, fieldId2, fieldId3, fieldId4 } = req.body;
 
-      const createResp = await fetch(`${KISSFLOW_URL_ASSET}/create/submit`, {
+      const createResp = await fetch(`${KISSFLOW_URL_ASSET}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -284,3 +284,4 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
