@@ -1,15 +1,14 @@
 let cachedItemIds = [];
 
-// ---------- DB Ready Promise ----------
+// ---------- DB Ready helper ----------
 const dbName = "KissflowDB";
 let db;
 
 const dbReady = new Promise((resolve, reject) => {
-  const request = indexedDB.open(dbName, 1);
+  const request = indexedDB.open(dbName, 2);
 
   request.onupgradeneeded = e => {
     db = e.target.result;
-
     if (!db.objectStoreNames.contains("items")) {
       db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
     }
@@ -20,19 +19,12 @@ const dbReady = new Promise((resolve, reject) => {
 
   request.onsuccess = e => {
     db = e.target.result;
-
-    if (!db.objectStoreNames.contains("items")) {
-      reject(new Error("Items store not found in DB"));
-      return;
-    }
-
     resolve(db);
   };
 
   request.onerror = e => reject(e.target.error);
 });
 
-// ---------- Safe helper ----------
 async function withDB() {
   if (db) return db;
   return await dbReady;
@@ -41,27 +33,24 @@ async function withDB() {
 // ---------- Load cached item IDs ----------
 async function loadCachedItems() {
   const db = await withDB();
-
   const tx = db.transaction("items", "readonly");
   const store = tx.objectStore("items");
-  const request = store.getAll();
+  const req = store.getAll();
 
-  request.onsuccess = () => {
-    cachedItemIds = request.result.map(r => r.itemId);
-    // Ensure at least one row exists after we have items
+  req.onsuccess = () => {
+    cachedItemIds = req.result.map(r => r.itemId);
     if (document.getElementById("partsBody").children.length === 0) addRow();
   };
 
-  request.onerror = e => {
+  req.onerror = e => {
     console.error("Failed to load cached items:", e.target.error);
     cachedItemIds = [];
   };
 }
 
-// ---------- Add a new parts row ----------
+// ---------- Add row ----------
 function addRow() {
   const tbody = document.getElementById("partsBody");
-
   const options = cachedItemIds.length
     ? cachedItemIds.map(id => `<option value="${id}">${id}</option>`).join("")
     : "<option value=''>-- No items yet --</option>";
@@ -122,26 +111,20 @@ async function saveMaintenanceTask(event) {
     },
   };
 
-  // Collect parts from table
   document.querySelectorAll("#partsBody tr").forEach(row => {
     const itemId = row.querySelector("select")?.value || "";
     const qty = row.querySelector("input[placeholder='Qty']")?.value || "";
-
-    if (itemId || qty) {
-      task.parts.push({ itemId, requiredQuantity: qty });
-    }
+    if (itemId || qty) task.parts.push({ itemId, requiredQuantity: qty });
   });
 
-  // Save to IndexedDB
   const tx = db.transaction("maintenance", "readwrite");
   tx.objectStore("maintenance").add(task);
   tx.oncomplete = () => {
     document.getElementById("msg").innerText = "✅ Maintenance task saved offline!";
-    loadRecords();
+    loadRecords?.();
   };
-  tx.onerror = e => console.error("Failed to save maintenance task:", e.target.error);
+  tx.onerror = e => console.error("Failed to save task:", e.target.error);
 
-  // Reset form
   event.target.reset();
   document.getElementById("partsBody").innerHTML = "";
   addRow();
@@ -153,8 +136,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (document.getElementById("partsBody").children.length === 0) addRow();
 
-  const maintenanceForm = document.getElementById("maintenanceForm");
-  maintenanceForm.addEventListener("submit", saveMaintenanceTask);
+  document.getElementById("maintenanceForm")
+    .addEventListener("submit", saveMaintenanceTask);
 
-  document.getElementById("removeRowBtn")?.addEventListener("click", removeSelectedRows);
+  document.getElementById("removeRowBtn")
+    ?.addEventListener("click", removeSelectedRows);
 });
