@@ -1,6 +1,9 @@
 const dbName = "KissflowDB";
 let db;
 
+const refreshBtn = document.getElementById("refreshBtn");
+refreshBtn.disabled = true; // disabled until DB ready
+
 const req = indexedDB.open(dbName, 1);
 req.onupgradeneeded = e => {
   db = e.target.result;
@@ -8,40 +11,35 @@ req.onupgradeneeded = e => {
 };
 req.onsuccess = e => {
   db = e.target.result;
-  // ✅ Always load cached data first
   loadFromDB();
+  refreshBtn.disabled = false; // ✅ enable only when db is ready
 };
 
-// ---------- Fetch and store (optional refresh) ----------
 async function refreshFromAPI() {
-  const btn = document.getElementById("refreshBtn");
-  btn.disabled = true;
-  btn.textContent = "Refreshing…";
+  refreshBtn.disabled = true;
+  refreshBtn.textContent = "Refreshing…";
   try {
     const res = await fetch("/api/itemids");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const ids = await res.json();
 
-    // Save to IndexedDB
     const tx = db.transaction("items", "readwrite");
     const store = tx.objectStore("items");
     store.clear();
     ids.forEach(id => store.add({ itemId: id }));
-    await tx.done;
+    await tx.complete;
 
     populateDropdown(ids);
     setStatus("Online: updated from API");
   } catch (err) {
     console.warn("API fetch failed (offline or error):", err);
     setStatus("Offline: showing cached data");
-    // ❗ No need to repopulate, the cached data is already loaded
   } finally {
-    btn.disabled = false;
-    btn.textContent = "Refresh from API";
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = "Refresh from API";
   }
 }
 
-// ---------- Load from IndexedDB ----------
 function loadFromDB() {
   const tx = db.transaction("items", "readonly");
   const store = tx.objectStore("items");
@@ -53,7 +51,6 @@ function loadFromDB() {
   };
 }
 
-// ---------- UI helpers ----------
 function populateDropdown(ids) {
   const select = document.getElementById("itemSelect");
   select.innerHTML = "";
@@ -66,10 +63,8 @@ function populateDropdown(ids) {
 }
 
 function setStatus(msg) {
-  document.getElementById("status").textContent = msg;
+  const statusEl = document.getElementById("status");
+  if (statusEl) statusEl.textContent = msg;
 }
 
-
-// ---------- Refresh button ----------
-document.getElementById("refreshBtn").addEventListener("click", refreshFromAPI);
-
+refreshBtn.addEventListener("click", refreshFromAPI);
