@@ -1,9 +1,6 @@
 const dbName = "KissflowDB";
 let db;
 
-const refreshBtn = document.getElementById("refreshBtn");
-refreshBtn.disabled = true; // disabled until DB is ready
-
 // ---------- Open IndexedDB ----------
 const req = indexedDB.open(dbName, 1);
 
@@ -104,3 +101,4 @@ function setStatus(msg) {
 
 // ---------- Event listeners ----------
 refreshBtn.addEventListener("click", refreshFromAPI);
+
