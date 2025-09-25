@@ -69,13 +69,7 @@ function setStatus(msg) {
   document.getElementById("status").textContent = msg;
 }
 
-// ---------- Form ----------
-document.getElementById("itemForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const val = document.getElementById("itemSelect").value;
-  document.getElementById("result").textContent =
-    val ? `You selected: ${val}` : "Please select an item.";
-});
 
 // ---------- Refresh button ----------
 document.getElementById("refreshBtn").addEventListener("click", refreshFromAPI);
+
