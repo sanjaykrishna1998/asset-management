@@ -1,40 +1,44 @@
 const dbName = "KissflowDB";
+const dbVersion = 2; // bump version if needed
 let db;
+
 const refreshBtn = document.getElementById("refreshBtn");
 refreshBtn.disabled = true;
 
-// ---------- DB Ready Promise ----------
+// ---------- DB Ready ----------
 const dbReady = new Promise((resolve, reject) => {
-  const request = indexedDB.open(dbName, 1);
+  const request = indexedDB.open(dbName, dbVersion);
 
   request.onupgradeneeded = e => {
     db = e.target.result;
+    console.log("Upgrading DB to version", db.version);
 
-    // Ensure stores exist
     if (!db.objectStoreNames.contains("items")) {
       db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
+      console.log("Created 'items' store");
     }
     if (!db.objectStoreNames.contains("maintenance")) {
       db.createObjectStore("maintenance", { keyPath: "id", autoIncrement: true });
+      console.log("Created 'maintenance' store");
     }
   };
 
   request.onsuccess = e => {
     db = e.target.result;
 
-    // Check again that store exists
-    if (!db.objectStoreNames.contains("items")) {
-      reject(new Error("Items store not found after DB open"));
-      return;
-    }
+    db.onversionchange = () => {
+      db.close();
+      alert("Database is outdated, please reload the page.");
+    };
 
+    refreshBtn.disabled = false;
     resolve(db);
   };
 
   request.onerror = e => reject(e.target.error);
 });
 
-// ---------- Safe helper: wait for DB ----------
+// ---------- Safe DB helper ----------
 async function withDB() {
   if (db) return db;
   return await dbReady;
@@ -47,8 +51,8 @@ async function saveItemsToDB(ids) {
     const tx = db.transaction("items", "readwrite");
     const store = tx.objectStore("items");
 
-    store.clear();
-    ids.forEach(id => store.add({ itemId: id }));
+    store.clear(); // clear existing items
+    for (const id of ids) store.add({ itemId: id });
 
     tx.oncomplete = () => resolve();
     tx.onerror = e => reject(e.target.error);
@@ -56,29 +60,42 @@ async function saveItemsToDB(ids) {
   });
 }
 
-// ---------- Load items from IndexedDB ----------
+// ---------- Load from DB ----------
 async function loadFromDB() {
   const db = await withDB();
-
-  if (!db.objectStoreNames.contains("items")) {
-    console.warn("Items store not found in DB yet.");
-    return;
-  }
-
   const tx = db.transaction("items", "readonly");
   const store = tx.objectStore("items");
-  const request = store.getAll();
+  const req = store.getAll();
 
-  request.onsuccess = () => {
-    const ids = request.result.map(r => r.itemId);
+  req.onsuccess = () => {
+    const ids = req.result.map(r => r.itemId);
     populateDropdown(ids);
     setStatus(ids.length ? "Loaded cached data" : "No cached data");
   };
 
-  request.onerror = e => {
-    console.error("Failed to load from IndexedDB", e.target.error);
+  req.onerror = e => {
+    console.error("Failed to load from DB", e.target.error);
     setStatus("Error loading cached data");
   };
+}
+
+// ---------- Populate dropdown ----------
+function populateDropdown(ids) {
+  const select = document.getElementById("itemSelect");
+  select.innerHTML = "";
+
+  if (ids.length) {
+    select.append(new Option("-- Select Item --", ""));
+    ids.forEach(id => select.append(new Option(id, id)));
+  } else {
+    select.append(new Option("No data available", ""));
+  }
+}
+
+// ---------- Update status ----------
+function setStatus(msg) {
+  const statusEl = document.getElementById("status");
+  if (statusEl) statusEl.textContent = msg;
 }
 
 // ---------- Refresh from API ----------
@@ -96,7 +113,6 @@ async function refreshFromAPI() {
     setStatus("Online: updated from API");
   } catch (err) {
     console.warn("API fetch failed:", err);
-    await loadFromDB();
     setStatus("Offline: showing cached data");
   } finally {
     refreshBtn.disabled = false;
@@ -104,29 +120,8 @@ async function refreshFromAPI() {
   }
 }
 
-// ---------- Populate dropdown ----------
-function populateDropdown(ids) {
-  const select = document.getElementById("itemSelect");
-  select.innerHTML = "";
-
-  if (ids.length) {
-    select.append(new Option("-- Select Item --", ""));
-    ids.forEach(id => select.append(new Option(id, id)));
-  } else {
-    select.append(new Option("No data available", ""));
-  }
-}
-
-// ---------- Status ----------
-function setStatus(msg) {
-  const statusEl = document.getElementById("status");
-  if (statusEl) statusEl.textContent = msg;
-}
-
-// ---------- Event listener ----------
+// ---------- Event listeners ----------
 refreshBtn.addEventListener("click", refreshFromAPI);
 
-// ---------- Init ----------
-dbReady
-  .then(() => loadFromDB())
-  .catch(err => console.error("Failed to initialize DB:", err));
+// Load cached data on startup
+loadFromDB();
