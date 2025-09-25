@@ -1,5 +1,3 @@
-<button id="refreshBtn">Fetch Item_ID_1</button>
-<ul id="itemList"></ul>
 
 <script>
 // ========================
@@ -81,3 +79,4 @@ function display(ids) {
 // Button listener
 document.getElementById("refreshBtn").addEventListener("click", fetchItemIds);
 </script>
+
