@@ -91,6 +91,15 @@
     @media (max-width: 600px) {
       form { grid-template-columns: 1fr; }
     }
+
+
+    .form-heading {
+      grid-column: 1 / -1;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -106,9 +115,11 @@
   </div>
 
   <main>
-    <!-- Asset Form -->
-<!-- Asset Form -->
-<form id="assetForm">
+
+  <div id="assetSection">
+  <h2 class="form-heading">Asset Form</h2>
+
+  <form id="assetForm">
   <div><label>Asset ID</label><input type="text" id="assetId" required></div>
 
   <div>
@@ -135,10 +146,13 @@
     <button type="submit" class="save-btn">Save Asset</button>
   </div>
 </form>
+</div>
 
 
 <!-- Maintenance Form -->
-<form id="maintenanceForm" style="display:none;">
+<div id="maintenanceSection" style="display:none;">
+<h2 class="form-heading">Maintenance Board</h2>
+<form id="maintenanceForm">
   <div><label>Board ID</label><input type="text" id="boardID" required></div>
   <div>
     <label>Status ID</label>
@@ -148,12 +162,8 @@
       <option value="Status_0001_InProgress">Status_0001_InProgress</option>
     </select>
   </div>
-  <div><label>Item ID</label><input type="text" id="itemID" required></div>
 
-  <div class="full-span">
-    <label for="problemDescription">Problem Description</label>
-    <textarea id="problemDescription" rows="3" placeholder="Enter Problem Description details..."></textarea>
-  </div>
+  <div><label>User's Email</label><input type="text" id="usersEmail" required></div>
 
   <div class="full-span">
     <label for="workNote">Work Notes</label>
@@ -169,9 +179,7 @@
         <tr style="background:#f1f1f1;">
           <th style="padding:8px; border:1px solid #ccc;">Select</th>
           <th style="padding:8px; border:1px solid #ccc;">Item ID</th>
-          <th style="padding:8px; border:1px solid #ccc;">Stock Availability</th>
           <th style="padding:8px; border:1px solid #ccc;">Required Quantity</th>
-          <th style="padding:8px; border:1px solid #ccc;">Inventory Unique ID</th>
         </tr>
       </thead>
       <tbody id="partsBody"></tbody>
@@ -207,16 +215,16 @@
     <button type="submit" class="save-btn">Save Task</button>
   </div>
 </form>
+</div>
 
 
     <p id="msg"></p>
   </main>
 
   <!-- External Scripts -->
-  <script src="db.js"></script>
-  <script src="menu.js"></script>
-  <script src="assetForm.js"></script>
-  <script src="maintenanceForm.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/assetForm.js"></script>
+  <script src="js/maintenanceForm.js"></script>
 </body>
 </html>
-
