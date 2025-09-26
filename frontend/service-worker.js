@@ -2,6 +2,10 @@ const CACHE_NAME = "my-pwa-cache-v4";
 const FILES_TO_CACHE = [
   "/",
   "/asset-form.html",
+  "/db.js",
+  "/menu.js",
+  "/assetForm.js",
+  "/maintenanceForm.js",
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",
@@ -71,5 +75,6 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
 
 
