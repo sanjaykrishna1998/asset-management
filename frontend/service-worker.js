@@ -1,7 +1,7 @@
-const CACHE_NAME = "my-pwa-cache-v2";
+const CACHE_NAME = "my-pwa-cache-v3";
 const FILES_TO_CACHE = [
-  "/",
-  "/asset-form.html",
+  "/",                // root
+  "/asset-form.html", // ✅ main page for offline use
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",
@@ -9,66 +9,50 @@ const FILES_TO_CACHE = [
   "/app.js"
 ];
 
-// Install Service Worker & Cache Files
+// Install & pre-cache
 self.addEventListener("install", (event) => {
-  console.log("[Service Worker] Install");
-
+  console.log("[SW] Install");
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[Service Worker] Caching app shell");
-      return Promise.all(
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
         FILES_TO_CACHE.map((url) =>
           fetch(url)
-            .then((response) => {
-              if (!response.ok) {
-                console.error(`[Service Worker] Failed to fetch ${url}: ${response.statusText}`);
-                return null;
-              }
-              return cache.put(url, response.clone());
+            .then((res) => {
+              if (res.ok) return cache.put(url, res.clone());
+              console.warn(`[SW] Skip ${url}: ${res.statusText}`);
             })
-            .catch((err) => {
-              console.error(`[Service Worker] Error fetching ${url}:`, err);
-            })
+            .catch((err) =>
+              console.warn(`[SW] Offline during cache of ${url}:`, err)
+            )
         )
-      );
-    })
+      )
+    )
   );
-
-  self.skipWaiting(); // Activate immediately
+  self.skipWaiting();
 });
 
-// Activate & Clean Old Caches
+// Activate & remove old caches
 self.addEventListener("activate", (event) => {
-  console.log("[Service Worker] Activate");
+  console.log("[SW] Activate");
   event.waitUntil(
-    caches.keys().then((keyList) =>
-      Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log("[Service Worker] Removing old cache", key);
-            return caches.delete(key);
-          }
-        })
-      )
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
     )
   );
   self.clients.claim();
 });
 
-// Fetch Cached Files or Network Fallback
+// Serve from cache first, network fallback
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return (
-        response ||
-        fetch(event.request).catch(() => {
-          // Offline fallback page (if you have one)
-          if (event.request.mode === "navigate") {
-            return caches.match("/asset-form.html");
-          }
-        })
-      );
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).catch(() => {
+        // ✅ Offline fallback to asset-form.html
+        if (event.request.mode === "navigate") {
+          return caches.match("/asset-form.html");
+        }
+      });
     })
   );
 });
-
