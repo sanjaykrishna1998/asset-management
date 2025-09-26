@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-pwa-cache-v2";
+const CACHE_NAME = "my-pwa-cache-v4";
 const FILES_TO_CACHE = [
   "/",
   "/asset-form.html",
@@ -71,4 +71,5 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
 
