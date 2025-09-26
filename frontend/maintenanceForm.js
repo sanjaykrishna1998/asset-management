@@ -8,7 +8,7 @@ let cachedItemIds = [];
 // Load item IDs from IndexedDB as soon as DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   // Open the same DB where your /kissflow-items sync stores data
-  const openReq = indexedDB.open("KissflowDB", 1);
+  const openReq = indexedDB.open("KissflowDB", 2);
   openReq.onsuccess = (e) => {
     const idb = e.target.result;
     const tx = idb.transaction("items", "readonly");
@@ -127,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addRow();
   });
 });
+
 
 
 
