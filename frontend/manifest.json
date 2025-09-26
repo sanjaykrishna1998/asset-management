@@ -1,7 +1,8 @@
 {
   "name": "Asset Management PWA",
   "short_name": "AssetPWA",
-  "start_url": "./asset-form.html",
+  "start_url": "/asset-form.html", 
+  "scope": "/", 
   "display": "standalone",
   "background_color": "#f8f9fa",
   "theme_color": "#28a745",
@@ -10,3 +11,4 @@
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
+
