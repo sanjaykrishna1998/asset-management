@@ -64,10 +64,11 @@ self.addEventListener("fetch", (event) => {
         fetch(event.request).catch(() => {
           // Offline fallback page (if you have one)
           if (event.request.mode === "navigate") {
-            return caches.match("/index.html");
+            return caches.match("/asset-form.html");
           }
         })
       );
     })
   );
 });
+
