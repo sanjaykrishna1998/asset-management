@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-pwa-cache-v3";
+const CACHE_NAME = "my-pwa-cache-v4";
 const FILES_TO_CACHE = [
   "/",                // root
   "/asset-form.html", // ✅ main page for offline use
@@ -56,3 +56,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
