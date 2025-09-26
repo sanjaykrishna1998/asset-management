@@ -101,6 +101,16 @@
       color: #333;
     }
   </style>
+
+  <link rel="manifest" href="./manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('Service Worker registered'))
+      .catch(err => console.error('Service Worker registration failed', err));
+  }
+</script>
+  
 </head>
 <body>
   <header>
@@ -228,4 +238,5 @@
   <script src="maintenanceForm.js"></script>
 </body>
 </html>
+
 
