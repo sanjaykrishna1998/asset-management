@@ -2,7 +2,7 @@
 const dbName = "KissflowDB";
 let db;
 
-const request = indexedDB.open(dbName, 1);
+const request = indexedDB.open(dbName, 2);
 request.onupgradeneeded = e => {
   db = e.target.result;
   db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
@@ -57,3 +57,4 @@ function display(ids) {
 
 document.getElementById("refreshBtn")
         .addEventListener("click", fetchItemIds);
+
