@@ -23,15 +23,15 @@ app.use(express.static(path.join(__dirname, "frontend"))); // your main frontend
 app.use(express.static(path.join(__dirname, "public")));   // optional extra static files
 
 // ---------- Kissflow Credentials ----------
-const ACCESS_KEY = "Ak038f9c11-bb30-4774-895c-076d8eb06232";
-const ACCESS_SECRET = "2CQEVoKKmR-AenZAj6vQnn7FDPfgz8Pu-HM-9KMbCsiFi2BLxxegd2ayYAYsLZLqhxGpiaMRh3Z2kpIn4IwCw";
+const ACCESS_KEY = "Ak08fe627f-d9b4-4650-bf94-a53d9c88ea2d";
+const ACCESS_SECRET = "EtAzPfKWlahxxsEHcUufU6AQ1wK2J6LHv-1sFts09T2T28pLsqPkQqgeBZqsr6AT5Q5Q5WlVKBNU4MqgNurwYw";
 
 const KISSFLOW_URL_ASSET =
-  "https://development-redkitebpm.kissflow.com/process/2/Ac9wu13v4qNL/Update_Asset_A00";
+  "https://redkitebpm.kissflow.com/process/2/Ac9wEqt1upkI/Update_Asset_A00";
 const KISSFLOW_URL_MAINTENANCE =
-  "https://development-redkitebpm.kissflow.com/case/2/Ac9wu13v4qNL/Asset_Maintenance_A00";
+  "https://redkitebpm.kissflow.com/case/2/Ac9wEqt1upkI/Asset_Maintenance_A00";
 const KISSFLOW_URL_ITEMS =
-  "https://development-redkitebpm.kissflow.com/form/2/Ac9wu13v4qNL/Item_Master_A00/list?page_number=1&page_size=1000";
+  "https://redkitebpm.kissflow.com/form/2/Ac9wEqt1upkI/Item_Master_A00/list?page_number=1&page_size=1000";
 
 // ---------- Health Check ----------
 app.get("/api/health", (req, res) => res.json({ status: "Server is running" }));
@@ -283,6 +283,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
