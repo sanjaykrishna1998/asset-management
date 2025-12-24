@@ -27,7 +27,7 @@ const ACCESS_KEY = "Ak08fe627f-d9b4-4650-bf94-a53d9c88ea2d";
 const ACCESS_SECRET = "EtAzPfKWlahxxsEHcUufU6AQ1wK2J6LHv-1sFts09T2T28pLsqPkQqgeBZqsr6AT5Q5Q5WlVKBNU4MqgNurwYw";
 
 const KISSFLOW_URL_ASSET =
-  "https://redkitebpm.kissflow.com/process/2/Ac9wEqt1upkI/Update_Asset_A00";
+  "https://redkitebpm.kissflow.com/process/2/Ac9wEqt1upkI/Update_Asset_Picture_A00";
 const KISSFLOW_URL_MAINTENANCE =
   "https://redkitebpm.kissflow.com/case/2/Ac9wEqt1upkI/Asset_Maintenance_A00";
 const KISSFLOW_URL_ITEMS =
@@ -283,6 +283,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
