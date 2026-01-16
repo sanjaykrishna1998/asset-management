@@ -70,6 +70,31 @@ app.get("/api/itemids", async (req, res) => {
 // ---------- Multer Setup ----------
 const upload = multer({ dest: "uploads/" });
 
+// =======================
+// SUBMIT ASSET PROCESS
+// =======================
+async function submitAssetProcess(instanceId, activityId) {
+  const submitUrl =
+    `${KISSFLOW_URL_ASSET}/${instanceId}/${activityId}/submit`;
+
+  const resp = await fetch(submitUrl, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "X-Access-Key-Id": ACCESS_KEY,
+      "X-Access-Key-Secret": ACCESS_SECRET,
+    },
+  });
+
+  const text = await resp.text();
+
+  if (!resp.ok) {
+    throw new Error(`Asset submit failed: ${text}`);
+  }
+
+  return text;
+}
+
 // ---------- Sync Asset ----------
 app.post(
   "/sync-asset",
@@ -145,46 +170,30 @@ app.post(
       uploads.push(await uploadImageToKF(fieldId3, "assetPic3"));
       uploads.push(await uploadImageToKF(fieldId4, "assetPic4"));
 
-      async function submitAssetProcess(instanceId, activityId) {
-  console.log("📨 Submitting Asset Update process...");
+            // -----------------------
+      // 3️⃣ SUBMIT PROCESS ✅
+      // -----------------------
+      const submitResult = await submitAssetProcess(instanceId, activityId);
 
-  const submitUrl =
-    `${KISSFLOW_URL_ASSET}/${instanceId}/${activityId}/submit`;
-
-  console.log("➡️ Submit URL:", submitUrl);
-
-  const submitResp = await fetch(submitUrl, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "X-Access-Key-Id": ACCESS_KEY,
-      "X-Access-Key-Secret": ACCESS_SECRET,
-    },
-  });
-
-  const submitText = await submitResp.text();
-  console.log("📨 Submit response:", submitText);
-
-  if (!submitResp.ok) {
-    throw new Error("Asset process submission failed");
-  }
-
-  return submitText;
-}
-
+      // -----------------------
+      // 4️⃣ Response
+      // -----------------------
       res.json({
         success: true,
-        createData,
+        submitted: true,
         instanceId,
         activityId,
         uploads,
+        submitResult,
       });
+
     } catch (err) {
       console.error("❌ /sync-asset error:", err);
       res.status(500).json({ error: err.message });
     }
   }
 );
+
 
 // ---------- Sync Maintenance ----------
 app.post(
@@ -310,6 +319,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
