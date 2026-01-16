@@ -145,6 +145,33 @@ app.post(
       uploads.push(await uploadImageToKF(fieldId3, "assetPic3"));
       uploads.push(await uploadImageToKF(fieldId4, "assetPic4"));
 
+      async function submitAssetProcess(instanceId, activityId) {
+  console.log("📨 Submitting Asset Update process...");
+
+  const submitUrl =
+    `${KISSFLOW_URL_ASSET}/${instanceId}/${activityId}/submit`;
+
+  console.log("➡️ Submit URL:", submitUrl);
+
+  const submitResp = await fetch(submitUrl, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "X-Access-Key-Id": ACCESS_KEY,
+      "X-Access-Key-Secret": ACCESS_SECRET,
+    },
+  });
+
+  const submitText = await submitResp.text();
+  console.log("📨 Submit response:", submitText);
+
+  if (!submitResp.ok) {
+    throw new Error("Asset process submission failed");
+  }
+
+  return submitText;
+}
+
       res.json({
         success: true,
         createData,
@@ -283,6 +310,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
