@@ -5,7 +5,13 @@ let db;
 const request = indexedDB.open(dbName, 2);
 request.onupgradeneeded = e => {
   db = e.target.result;
-  db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
+
+  if (!db.objectStoreNames.contains("items")) {
+    db.createObjectStore("items", {
+      keyPath: "id",
+      autoIncrement: true
+    });
+  }
 };
 request.onsuccess = e => {
   db = e.target.result;
@@ -57,4 +63,5 @@ function display(ids) {
 
 document.getElementById("refreshBtn")
         .addEventListener("click", fetchItemIds);
+
 
