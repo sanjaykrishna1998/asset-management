@@ -75,7 +75,6 @@ async function syncAll() {
           formData.append("statusID", record.statusID || "");
           formData.append("itemID", record.itemID || "");
           formData.append("problemDescription", record.problemDescription || "");
-          formData.append("workNote", record.workNote || "");
           formData.append("observations", record.observations || "");
           formData.append("actionsTaken", record.actionsTaken || "");
           formData.append("parts", JSON.stringify(record.parts || []));
@@ -136,3 +135,4 @@ async function syncAll() {
     loadRecords();
   };
 }
+
