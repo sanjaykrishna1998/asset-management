@@ -84,7 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
       boardID: document.getElementById("boardID").value,
       statusID: document.getElementById("statusID").value,
       usersEmail: document.getElementById("usersEmail").value,
-      workNote: document.getElementById("workNote").value,
       observations: document.getElementById("observations").value,
       actionsTaken: document.getElementById("actionsTaken").value,
       parts: [],
@@ -127,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addRow();
   });
 });
+
 
 
 
