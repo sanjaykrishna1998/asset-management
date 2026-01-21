@@ -45,7 +45,6 @@ function renderTable(type, records) {
     headHTML = `
       <tr>
         <th>Board ID</th><th>Status ID</th><th>User's Email</th>
-        <th>Work Note</th>
         <th>Observations</th><th>Actions Taken</th>
         <th>Maintenance Photos</th><th>Supporting Documents</th>
         <th>Parts</th><th>Synced?</th>
@@ -78,7 +77,6 @@ function renderTable(type, records) {
           <td>${r.boardID || ""}</td>
           <td>${r.statusID || ""}</td>
           <td>${r.usersEmail || ""}</td>
-          <td>${r.workNote || ""}</td>
           <td>${r.observations || ""}</td>
           <td>${r.actionsTaken || ""}</td>
           <td>${photosHTML}</td>
@@ -113,3 +111,4 @@ function updateProgress(done, total) {
 function hideProgress() {
   document.getElementById("syncProgressContainer").style.display = "none";
 }
+
