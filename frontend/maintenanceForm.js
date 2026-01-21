@@ -44,7 +44,7 @@ function addRow() {
         ${options}
       </select>
     </td>
-    <td style="border:1px solid #ccc;"><input type="number" placeholder="Qty"></td>
+    <td style="border:1px solid #ccc;"><input type="number" placeholder="Qty" min="0" step="1"></td>
   `;
   tbody.appendChild(newRow);
 }
@@ -126,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addRow();
   });
 });
+
 
 
 
