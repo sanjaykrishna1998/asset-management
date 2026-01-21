@@ -31,7 +31,7 @@ const KISSFLOW_URL_ASSET =
 const KISSFLOW_URL_MAINTENANCE =
   "https://redkitebpm.kissflow.com/case/2/Ac9wEqt1upkI/Asset_Maintenance_A00";
 const KISSFLOW_URL_ITEMS =
-  "https://redkitebpm.kissflow.com/form/2/Ac9wEqt1upkI/Item_Master_A00/list?page_number=1&page_size=1000";
+  "https://redkitebpm.kissflow.com/form/2/Ac9wEqt1upkI/Inventory_A02/list?page_number=1&page_size=1000";
 
 // ---------- Health Check ----------
 app.get("/api/health", (req, res) => res.json({ status: "Server is running" }));
@@ -59,7 +59,7 @@ app.get("/api/itemids", async (req, res) => {
       ? data
       : data.Data || [];
 
-    const itemIds = rows.map(r => r.Item_ID_1).filter(Boolean);
+    const itemIds = rows.map(r => r.Item_ID).filter(Boolean);
     res.json(itemIds);
   } catch (err) {
     console.error("❌ /api/itemids error:", err);
@@ -319,6 +319,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
