@@ -235,7 +235,6 @@ app.post(
           },
           body: JSON.stringify({
             Agents_Email: req.body.usersEmail,
-            Work_Notes: req.body.workNote,
             Observations: req.body.observations,
             Actions_Taken: req.body.actionsTaken,
             "Table::Select_Replacement_Parts": partsForKissflow,
@@ -319,6 +318,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
