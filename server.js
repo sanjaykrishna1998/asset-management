@@ -59,7 +59,7 @@ app.get("/api/itemids", async (req, res) => {
       ? data
       : data.Data || [];
 
-    const itemIds = rows.filter(r => r.Inventory_Type === "Asset").map(r => r.Item_ID).filter(Boolean);
+    const itemIds = rows.filter(r => r.Inventory_Type === "Consumables").map(r => r.Item_ID).filter(Boolean);
     res.json(itemIds);
   } catch (err) {
     console.error("❌ /api/itemids error:", err);
@@ -318,6 +318,7 @@ app.post(
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
 
 
