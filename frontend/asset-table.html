@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>View & Sync Records</title>
@@ -16,9 +15,13 @@
       width: 100%;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
       font-family: "Segoe UI", Tahoma, sans-serif;
       background: #f5f7fa;
+    }
+
+    body {
+      overflow-y: scroll;
+      overflow-x: hidden;
     }
 
     header {
@@ -129,8 +132,9 @@
 
     .table-wrapper {
       width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: auto;
     }
 
     table {
@@ -148,6 +152,19 @@
 
     th {
       background: #e3f2fd;
+    }
+
+    .table-wrapper::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-thumb {
+      background: #1e88e5;
+      border-radius: 4px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+      background: #e0e0e0;
     }
 
     @media (max-width: 768px) {
