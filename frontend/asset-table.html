@@ -2,65 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>View & Sync Records</title>
+
   <style>
-    body { font-family: "Segoe UI", Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 0; }
-    header { background: #1e88e5; color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    header h1 { margin: 0; font-size: 20px; }
-    .menu-icon { font-size: 26px; cursor: pointer; }
-    .side-menu { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #fff; box-shadow: 2px 0 8px rgba(0,0,0,0.3); transition: 0.3s; padding-top: 60px; z-index: 1000; }
-    .side-menu.open { left: 0; }
-    .side-menu a { display: block; padding: 15px 20px; color: #333; text-decoration: none; font-weight: bold; border-bottom: 1px solid #eee; }
-    .side-menu a:hover { background: #1e88e5; color: #fff; }
-    main { padding: 20px; display: flex; justify-content: center; }
-    .container { background: white; padding: 25px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); width: 1400px; text-align: center; }
-    h2 { color: #1e88e5; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-    th { background: #e3f2fd; }
-    button { padding: 12px; background: #1e88e5; color: white; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; margin: 5px; }
-    button:hover { background: #1565c0; }
-    #deleteBtn { background: #e53935; }
-    #deleteBtn:hover { background: #b71c1c; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f5f7fa;
+    }
+
+    header {
+      background: #1e88e5;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .menu-icon {
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #fff;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+      transition: 0.3s;
+      padding-top: 60px;
+      z-index: 1000;
+    }
+
+    .side-menu.open {
+      left: 0;
+    }
+
+    .side-menu a {
+      display: block;
+      padding: 15px 20px;
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+      border-bottom: 1px solid #eee;
+    }
+
+    .side-menu a:hover {
+      background: #1e88e5;
+      color: #fff;
+    }
+
+    main {
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 1400px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #1e88e5;
+      margin-bottom: 20px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 12px 16px;
+      background: #1e88e5;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1565c0;
+    }
+
+    #deleteBtn {
+      background: #e53935;
+    }
+
+    #deleteBtn:hover {
+      background: #b71c1c;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #e3f2fd;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 16px;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      th, td {
+        font-size: 14px;
+        padding: 8px;
+      }
+    }
   </style>
 </head>
+
 <body>
+
   <header>
     <span class="menu-icon" onclick="toggleMenu()">☰</span>
     <h1>Records Dashboard</h1>
   </header>
 
-  <!-- Side Menu -->
   <div id="menu" class="side-menu">
-    <a href="#" onclick="switchView('assets')"> View Assets</a>
-    <a href="#" onclick="switchView('maintenance')"> View Maintenance</a>
+    <a href="#" onclick="switchView('assets')">📦 View Assets</a>
+    <a href="#" onclick="switchView('maintenance')">🛠️ View Maintenance</a>
   </div>
 
   <main>
     <div class="container">
       <h2 id="title">📦 Assets</h2>
 
-      <!-- Buttons -->
-      <div>
+      <div class="btn-group">
         <button onclick="syncAll()">🔄 Sync All</button>
         <button id="deleteBtn" onclick="deleteAll()">🗑️ Delete All Records</button>
       </div>
 
-      <!-- Table -->
-      <table id="dataTable">
-        <thead id="tableHead"></thead>
-        <tbody id="recordsTable"></tbody>
-      </table>
+      <div class="table-wrapper">
+        <table id="dataTable">
+          <thead id="tableHead"></thead>
+          <tbody id="recordsTable"></tbody>
+        </table>
+      </div>
     </div>
   </main>
 
-  <!-- External JS -->
   <script src="db1.js"></script>
   <script src="menu1.js"></script>
   <script src="tables.js"></script>
   <script src="sync.js"></script>
   <script src="delete.js"></script>
+
 </body>
 </html>
-
